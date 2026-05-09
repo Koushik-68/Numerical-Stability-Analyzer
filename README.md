@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+
 # Numerical Stability Analyzer
 
 ### Hybrid Static and Dynamic Analysis for Floating-Point Error Detection
@@ -107,4 +109,4 @@ streamlit run app.py
 
 # ⭐ Support
 
-If you found this project useful, consider giving it a star ⭐
+# If you found this project useful, consider giving it a star ⭐
