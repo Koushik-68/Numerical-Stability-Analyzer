@@ -1,61 +1,35 @@
+import os
+import sys
+
+# Absolute path correction injection - MUST RUN FIRST BEFORE SUB-PACKAGE IMPORTS
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
 import streamlit as st
-import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
-from analyzer.static_analyzer import analyze_file
-from analyzer.dynamic_analyzer import analyze_function, FUNCTION_PROFILES
-from analyzer.error_metrics import relative_error, absolute_error
+# App architecture imports
+from UI.dashboard import render_app
+from analyzer.static_analyzer import detect_patterns
+from analyzer.instrumentor import instrument_code
 from analyzer.executor import compile_code, run_code
-from analyzer.runtime_parser import summarize_results, overall_status_from_summary
-from analyzer.fixer import suggest_fix, apply_fix
-from UI.styles import inject_styles
+from analyzer.runtime_parser import summarize_results, extract_traces
+from analyzer.dynamic_analyzer import FUNCTION_PROFILES, analyze_function
+from analyzer.error_metrics import relative_error, absolute_error
 
+# Import the Grok AI Engine features
+from analyzer.ai_engine import ai_suggest_and_fix
 
+# Initialize overall global Streamlit configurations
 st.set_page_config(page_title="Numerical Stability Analyzer", layout="wide")
-inject_styles()
 
-
-if "code" not in st.session_state:
-    st.session_state.code = ""
-if "runtime_summary" not in st.session_state:
-    st.session_state.runtime_summary = []
-if "runtime_output" not in st.session_state:
-    st.session_state.runtime_output = ""
-if "issues" not in st.session_state:
-    st.session_state.issues = []
-if "fixes" not in st.session_state:
-    st.session_state.fixes = []
-if "overall_status" not in st.session_state:
-    st.session_state.overall_status = "Unknown"
-if "selected_function_key" not in st.session_state:
-    st.session_state.selected_function_key = None
-if "selected_section" not in st.session_state:
-    st.session_state.selected_section = "Analyzer"
-
-
-with st.sidebar:
-    st.markdown("# 🧠 Analyzer")
-    st.session_state.selected_section = st.radio(
-        "Navigation",
-        ["Analyzer", "Visualization", "Report", "Settings"],
-        index=["Analyzer", "Visualization", "Report", "Settings"].index(st.session_state.selected_section)
-        if st.session_state.selected_section in ["Analyzer", "Visualization", "Report", "Settings"]
-        else 0,
-    )
-
-
-st.markdown(
-    """
-    <div class="app-header">
-        <div class="app-title">Numerical Stability Analyzer</div>
-        <div class="app-subtitle">Analyze floating-point errors and numerical instability</div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-
-placeholder = """#include <stdio.h>
+# Initialize global session state maps safely
+if "state" not in st.session_state:
+    st.session_state.state = {
+        "active_section": "Analyzer",
+        "code": """#include <stdio.h>
 #include <math.h>
 
 double compute(double x) {
@@ -65,223 +39,142 @@ double compute(double x) {
 int main() {
     double x = 1000000.0;
     double result = compute(x);
-    printf("RESULT:%lf\\n", result);
+    printf("RESULT_UNSTABLE: %lf\\n", result);
     return 0;
-}
-"""
+}""",
+        "runtime_summary": [],
+        "key_findings": ["No analysis run yet. Paste C code and click 'Run Analysis'."],
+        "suggestions": [],
+        "conclusion": [],
+        "plots": {},
+        "ai_explanation": ""  # Stores Grok's engineering explanation pointwise
+    }
 
+state = st.session_state.state
 
-page = st.session_state.selected_section
+# =====================================================
+# PIPELINE ORCHESTRATION ENGINE (RUN ANALYSIS)
+# =====================================================
+if state.get("analyze_pressed"):
+    state["analyze_pressed"] = False # Reset flag instantly
+    
+    # FIXED: Extract value from widget cache directly before starting file compilation pass
+    if "code_textarea" in st.session_state:
+        state["code"] = st.session_state["code_textarea"]
+    
+    # Ensure working directories exist safely
+    os.makedirs("input_code", exist_ok=True)
+    os.makedirs("instrumented_code", exist_ok=True)
+    
+    input_path = "input_code/temp_input.c"
+    inst_path = "instrumented_code/temp_inst.c"
+    
+    # Save code buffer to storage disk
+    with open(input_path, "w") as f:
+        f.write(state["code"])
+        
+    try:
+        # 1. Run Hybrid Pipeline
+        static_issues = detect_patterns(state["code"])
+        instrument_code(input_path, inst_path)
+        exe_file = compile_code(inst_path)
+        stdout_output = run_code(exe_file)
+        
+        # 2. Parse Metrics Maps
+        summary = summarize_results(stdout_output)
+        traces = extract_traces(stdout_output)
+        state["runtime_summary"] = summary
+        
+        # 3. Generate Analytical Report Blocks
+        state["key_findings"] = [f"Static issues caught: {len(static_issues)}"] + static_issues
+        
+        # Preserve structural AI updates in final reports
+        if state["ai_explanation"]:
+            state["conclusion"] = ["Analysis pass completed.", f"AI Optimization Note: {state['ai_explanation']}"]
+        else:
+            state["conclusion"] = ["Analysis pass completed successfully without crashes."]
+            
+        # 4. Generate Dynamic Evaluation Visualization Matrix
+        trace_dict = dict(traces)
+        x_val = trace_dict.get("x", 1000000.0)
+        
+        plots_dict = {}
+        for row in summary:
+            func_key = row["function_key"]
+            if func_key in FUNCTION_PROFILES:
+                prof = FUNCTION_PROFILES[func_key]
+                inputs = prof["graph_values"]
+                
+                rel_errors = []
+                abs_errors = []
+                
+                for inp in inputs:
+                    f_res, ref_res = analyze_function(func_key, inp)
+                    rel_errors.append(relative_error(f_res, ref_res))
+                    abs_errors.append(absolute_error(f_res, ref_res))
+                
+                # Render Matplotlib Error Growth Plot
+                fig, ax = plt.subplots(figsize=(6, 3.5))
+                fig.patch.set_facecolor('#0b0c0f')
+                ax.set_facecolor('#0b0c0f')
+                
+                ax.plot(inputs, rel_errors, color='#7b2b2b', marker='o', label='Relative Error', linewidth=2)
+                ax.set_xscale('log')
+                
+                # Safety guard check to handle absolute optimized zero values
+                if max(rel_errors) > 0.0:
+                    ax.set_yscale('log')
+                else:
+                    ax.set_yscale('linear')
+                    ax.set_ylim(-0.1, 1.1)
+                
+                ax.set_title(f"Error Growth Curve: {prof['label']}", color='#e6eef3', fontsize=10)
+                ax.tick_params(colors='#9fb0bd', labelsize=8)
+                ax.grid(True, linestyle='--', alpha=0.2, color='#e6eef3')
+                
+                for spine in ax.spines.values():
+                    spine.set_color('#202429')
+                    
+                plt.tight_layout()
+                plots_dict[func_key] = fig
+                
+        state["plots"] = plots_dict
+        st.toast("Analysis Completed Successfully!", icon="🚀")
 
+    except Exception as e:
+        st.error(f"Pipeline Processing Error: {str(e)}")
+    
+    # Force state synchronization and page layout rerun
+    st.rerun()
 
-if page == "Analyzer":
-    st.markdown("## Code Input")
-    st.session_state.code = st.text_area(
-        "Paste your C code",
-        value=st.session_state.code,
-        height=280,
-        placeholder=placeholder,
-    )
-
-    analyze_col, fix_col = st.columns([1, 1])
-    analyze_pressed = analyze_col.button("🚀 Run Analysis")
-    autofix_pressed = fix_col.button("🛠 Auto Fix")
-
-    if autofix_pressed:
-        st.session_state.code = apply_fix(st.session_state.code)
-        st.session_state.fixes = suggest_fix(st.session_state.code)
-        st.success("Applied auto-fix to code")
-
-    runtime_error = None
-    if analyze_pressed and st.session_state.code.strip():
-        try:
-            with open("temp.c", "w", encoding="utf-8") as f:
-                f.write(st.session_state.code)
-
-            exe_file = compile_code("temp.c")
-            output = run_code(exe_file)
-
-            st.session_state.runtime_output = output
-            st.session_state.runtime_summary = summarize_results(output)
-            st.session_state.overall_status = overall_status_from_summary(st.session_state.runtime_summary)
-            st.session_state.issues = analyze_file("temp.c")
-            st.session_state.fixes = suggest_fix(st.session_state.code)
-
-            detected_keys = [row.get("function_key") for row in st.session_state.runtime_summary if row.get("function_key") in FUNCTION_PROFILES]
-            if detected_keys:
-                st.session_state.selected_function_key = detected_keys[0]
-
-        except Exception as exc:
-            runtime_error = str(exc)
-
-    st.markdown("---")
-    st.markdown("## Runtime Summary")
-
-    if runtime_error:
-        st.error(f"Could not run the program: {runtime_error}")
-    elif st.session_state.runtime_summary:
-        runtime_df = pd.DataFrame(
-            [
-                {
-                    "Function": row["function"],
-                    "Error": row["error"],
-                    "Status": row["status"],
-                    "Reason": row.get("reason", ""),
-                }
-                for row in st.session_state.runtime_summary
-            ]
-        )
-        st.dataframe(runtime_df, use_container_width=True, hide_index=True)
-        st.markdown(f"**Overall status:** {st.session_state.overall_status}")
-
-        detected = []
-        label_map = {}
-        for row in st.session_state.runtime_summary:
-            key = row.get("function_key")
-            if key in FUNCTION_PROFILES and key not in detected:
-                detected.append(key)
-                label_map[key] = row.get("function") or FUNCTION_PROFILES[key]["label"]
-
-        if detected:
-            default_key = st.session_state.selected_function_key if st.session_state.selected_function_key in detected else detected[0]
-            st.session_state.selected_function_key = st.selectbox(
-                "Detected functions",
-                options=detected,
-                index=detected.index(default_key),
-                format_func=lambda k: label_map.get(k, FUNCTION_PROFILES[k]["label"]),
-            )
-
-        if st.session_state.selected_function_key:
-            selected_profile = FUNCTION_PROFILES[st.session_state.selected_function_key]
-            st.markdown("---")
-            st.markdown("## Function Results")
-
-            x = st.number_input(
-                selected_profile["input_label"],
-                min_value=selected_profile["min_input"],
-                max_value=selected_profile["max_input"],
-                value=selected_profile["default_input"],
-                step=selected_profile["step"],
-            )
-
-            float_res, high_res = analyze_function(st.session_state.selected_function_key, x)
-            float_res = float(float_res)
-            high_res = float(high_res)
-            abs_err = absolute_error(float_res, high_res)
-            rel_err = relative_error(float_res, high_res) if high_res not in (0.0, -0.0) else abs_err
-
-            metric1, metric2, metric3, metric4 = st.columns(4)
-            metric1.metric("Delta", f"{abs_err:.12g}")
-            metric2.metric("Float Result", f"{float_res:.10f}")
-            metric3.metric("Reference", f"{high_res:.10f}")
-            metric4.metric("Relative Error", f"{rel_err:.6e}")
-
-            if rel_err > 1e-6:
-                st.error("🔥 Numerical Instability Detected")
-            else:
-                st.success("✅ Computation is Stable for the selected input")
+# =====================================================
+# ADVANCED AI AUTO-FIX LAYER (GROK/GROQ API TRIGGER)
+# =====================================================
+if state.get("autofix_pressed"):
+    state["autofix_pressed"] = False  # Reset flag instantly
+    
+    # Backup code buffer into storage arrays to drive side-by-side layout comparison channels
+    state["original_backup_code"] = state["code"]
+    
+    with st.spinner("🧠 Re-engineering your math equations for optimal stability..."):
+        ai_results = ai_suggest_and_fix(state["code"])
+        
+    if ai_results["fixed_code"] != state["code"]:
+        state["code"] = ai_results["fixed_code"]
+        st.session_state["code_textarea"] = ai_results["fixed_code"]
+        state["ai_explanation"] = ai_results["explanation"]
+        
+        state["suggestions"] = [
+            "AI Applied Patches Successfully.",
+            f"Mathematical Justification: {ai_results['explanation']}"
+        ]
+        st.toast("Applied AI-optimized mathematical safety patches!", icon="🧠")
     else:
-        st.info("Paste code and press Run Analysis.")
+        st.toast("AI analyzed the code and found it structurally sound.", icon="ℹ️")
+        
+    st.rerun()
 
-elif page == "Visualization":
-    st.markdown("## Visualization")
-    if not st.session_state.runtime_summary:
-        st.info("Run analysis first in the Analyzer page to populate graphs.")
-    else:
-        detected = []
-        label_map = {}
-        for row in st.session_state.runtime_summary:
-            key = row.get("function_key")
-            if key in FUNCTION_PROFILES and key not in detected:
-                detected.append(key)
-                label_map[key] = row.get("function") or FUNCTION_PROFILES[key]["label"]
-
-        if detected:
-            default_key = st.session_state.selected_function_key if st.session_state.selected_function_key in detected else detected[0]
-            selected_key = st.selectbox(
-                "Detected functions",
-                options=detected,
-                index=detected.index(default_key),
-                format_func=lambda k: label_map.get(k, FUNCTION_PROFILES[k]["label"]),
-            )
-            profile = FUNCTION_PROFILES[selected_key]
-
-            x_vals = profile["graph_values"]
-            errors = []
-            gaps = []
-            for val in x_vals:
-                f_res, h_res = analyze_function(selected_key, val)
-                f_res = float(f_res)
-                h_res = float(h_res)
-                errors.append(relative_error(f_res, h_res) if h_res not in (0.0, -0.0) else absolute_error(f_res, h_res))
-                gaps.append(abs(f_res - h_res))
-
-            graph_col1, graph_col2 = st.columns(2)
-
-            with graph_col1:
-                st.markdown("### Relative Error vs Input")
-                fig1, ax1 = plt.subplots()
-                ax1.plot(x_vals, errors, marker="o", color="#6ea8fe")
-                ax1.set_xscale("log")
-                ax1.set_xlabel(profile["input_label"])
-                ax1.set_ylabel("Relative Error")
-                ax1.set_title(f"Relative Error vs Input ({profile['label']})")
-                st.pyplot(fig1)
-                st.caption("Shows how the selected function's error changes as the input grows.")
-
-            with graph_col2:
-                st.markdown("### Absolute Difference Between Unstable and Stable Outputs")
-                fig2, ax2 = plt.subplots()
-                ax2.plot(x_vals, gaps, marker="o", color="#d1495b")
-                ax2.set_xscale("log")
-                ax2.set_xlabel(profile["input_label"])
-                ax2.set_ylabel("Absolute Difference")
-                ax2.set_title(f"Absolute Difference ({profile['label']})")
-                st.pyplot(fig2)
-                st.caption("Compares the unstable expression against its stable reference form.")
-        else:
-            st.info("No detected functions available for plotting.")
-
-elif page == "Report":
-    st.markdown("## Report")
-
-    report_col1, report_col2 = st.columns(2)
-
-    with report_col1:
-        st.markdown("### Static Analysis")
-        issues = st.session_state.issues or analyze_file("temp.c")
-        if issues:
-            for issue in issues:
-                st.warning(issue)
-        else:
-            st.success("No major static issues detected")
-
-        st.markdown("---")
-        st.markdown("### Suggestions")
-        fixes = st.session_state.fixes or suggest_fix(st.session_state.code)
-        if fixes:
-            for fix in fixes:
-                st.info(fix)
-        else:
-            st.success("No suggestions")
-
-    with report_col2:
-        st.markdown("### Conclusion")
-        st.write(f"Overall status: **{st.session_state.overall_status}**")
-
-        if st.session_state.runtime_summary:
-            st.markdown("---")
-            st.markdown("### Per-function Analysis")
-            for row in st.session_state.runtime_summary:
-                st.write(f"- **{row.get('function')}** — {row.get('status')}. {row.get('reason', '')}")
-
-        st.markdown("---")
-        st.markdown("### Actions")
-        if st.button("Apply Fix"):
-            st.session_state.code = apply_fix(st.session_state.code)
-            st.session_state.fixes = suggest_fix(st.session_state.code)
-            st.success("Applied fix to code")
-
-else:
-    st.markdown("## Settings")
-    st.info("No settings configured yet.")
+# =====================================================
+# RENDERING PASS
+# =====================================================
+render_app(state)

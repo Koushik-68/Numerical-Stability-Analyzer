@@ -1,0 +1,7 @@
+.env
+
+__pycache__/
+*.pyc
+
+input_code/temp_input.c
+instrumented_code/temp_inst.c
