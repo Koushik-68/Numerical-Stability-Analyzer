@@ -25,4 +25,4 @@ def instrument_code(input_path, output_path):
     with open(output_path, 'w') as f:
         f.writelines(instrumented)
 
-    print("[✓] Code Instrumented with TRACE")
+    print("[OK] Code Instrumented with TRACE")

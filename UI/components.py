@@ -12,31 +12,27 @@ def render_sidebar(active_section):
 
         st.markdown("""
         <style>
-        /* Modern Premium Palette & CSS Variables */
         :root {
-            --sidebar-bg: linear-gradient(180deg, #0b0f19 0%, #111827 100%);
-            --button-idle-bg: rgba(255, 255, 255, 0.03);
+            --sidebar-bg: linear-gradient(180deg, #0b0f14 0%, #080b10 100%);
+            --button-idle-bg: rgba(255, 255, 255, 0.02);
             --button-idle-border: rgba(255, 255, 255, 0.08);
-            --button-active-bg: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            --button-active-border: #3b82f6;
-            --glow-color: rgba(37, 99, 235, 0.45);
-            --text-muted: #9ca3af;
-            --text-bright: #f9fafb;
+            --button-active-bg: linear-gradient(180deg, #151b22 0%, #10151b 100%);
+            --button-active-border: rgba(94, 164, 214, 0.65);
+            --glow-color: rgba(94, 164, 214, 0.18);
+            --text-muted: #9aa3ad;
+            --text-bright: #eef2f7;
         }
 
-        /* Sidebar Main Container */
         section[data-testid="stSidebar"] {
             background: var(--sidebar-bg) !important;
-            border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
-            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+            border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+            box-shadow: 8px 0 30px rgba(0, 0, 0, 0.35);
         }
 
-        /* Hide default streamlit radio circles */
         div[role="radiogroup"] > label > div:first-child {
             display: none !important;
         }
 
-        /* Force Radio Group Layout to handle uniform widths */
         div[role="radiogroup"] {
             display: flex !important;
             flex-direction: column !important;
@@ -45,7 +41,6 @@ def render_sidebar(active_section):
             padding: 0 !important;
         }
 
-        /* Uniform, Sized Navigation Cards */
         div[role="radiogroup"] label {
             background: var(--button-idle-bg) !important;
             border: 1px solid var(--button-idle-border) !important;
@@ -59,33 +54,31 @@ def render_sidebar(active_section):
             align-items: center !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             cursor: pointer !important;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
-        /* High-End Hover Effects */
         div[role="radiogroup"] label:hover {
             transform: translateX(4px);
-            background: rgba(255, 255, 255, 0.08) !important;
-            border-color: rgba(59, 130, 246, 0.5) !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.04) !important;
+            border-color: rgba(94, 164, 214, 0.32) !important;
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
         }
 
-        /* Active Navigation Tab with Dynamic Pulsing Glow */
         div[role="radiogroup"] label:has(input:checked) {
-            background: var(--button-active-bg) !important;
+            background: linear-gradient(180deg, rgba(20, 26, 33, 0.98) 0%, rgba(13, 18, 24, 0.98) 100%) !important;
             border-color: var(--button-active-border) !important;
-            box-shadow: 
-                0 0 20px var(--glow-color),
-                inset 0 1px 1px rgba(255, 255, 255, 0.2);
-            animation: pulseGlow 2.5s infinite alternate;
+            box-shadow:
+                0 0 0 1px rgba(94, 164, 214, 0.12),
+                0 10px 26px rgba(0, 0, 0, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            animation: pulseGlow 3s infinite alternate;
         }
 
-        /* Text & Icon Typography Adjustments */
         div[role="radiogroup"] label p {
             font-size: 15px !important;
             font-weight: 500 !important;
-            letter-spacing: 0.5px !important;
+            letter-spacing: 0.01em !important;
             color: var(--text-muted) !important;
             margin: 0 !important;
             padding: 0 !important;
@@ -101,22 +94,21 @@ def render_sidebar(active_section):
             color: var(--text-bright) !important;
         }
 
-        /* Professional Header Logo Card */
         .logo-card {
-            background: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 0%, rgba(31, 41, 55, 0.8) 100%);
+            background: linear-gradient(180deg, rgba(18, 23, 29, 0.98) 0%, rgba(11, 15, 19, 0.98) 100%);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 18px;
             padding: 22px;
             color: var(--text-bright);
             margin-bottom: 24px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
         }
 
         .logo-title {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
-            letter-spacing: -0.5px;
-            color: #ffffff;
+            letter-spacing: -0.03em;
+            color: #f8fafc;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -125,42 +117,37 @@ def render_sidebar(active_section):
         .logo-sub {
             font-size: 11px;
             font-weight: 600;
-            color: #6b7280;
+            color: #97a3af;
             margin-top: 6px;
             text-transform: uppercase;
             letter-spacing: 1.5px;
         }
 
-        /* Breathing Pulse Keyframes */
         @keyframes pulseGlow {
-            0% { box-shadow: 0 0 15px rgba(37, 99, 235, 0.4); }
-            100% { box-shadow: 0 0 25px rgba(37, 99, 235, 0.7); }
+            0% { box-shadow: 0 0 0 1px rgba(94, 164, 214, 0.08), 0 10px 22px rgba(0, 0, 0, 0.22); }
+            100% { box-shadow: 0 0 0 1px rgba(94, 164, 214, 0.14), 0 12px 28px rgba(0, 0, 0, 0.30); }
         }
         </style>
         """, unsafe_allow_html=True)
 
         st.markdown("""
-        <div class="logo-card">
-            <div class="logo-title"> Analyzer</div>
-            <div class="logo-sub">
-                Numerical Stability Platform
-            </div>
+        <div class="logo-card ui-animate-in">
+            <div class="logo-title">Numerical Stability</div>
+            <div class="logo-sub">Floating-point analysis suite</div>
         </div>
         """, unsafe_allow_html=True)
 
-        # Standard clean professional UI symbol icons 
         menu_items = [
-            "⚡  Analyzer",
-            "📈  Visualization",
-            "📋  Report",
-            # "⚙  Settings"
+            "Analyzer",
+            "Visualization",
+            "Report",
         ]
 
         page_map = {
-            "⚡  Analyzer": "Analyzer",
-            "📈  Visualization": "Visualization",
-            "📋  Report": "Report",
-            "⚙  Settings": "Settings"
+            "Analyzer": "Analyzer",
+            "Visualization": "Visualization",
+            "Report": "Report",
+            "Settings": "Settings"
         }
 
         reverse_map = {v: k for k, v in page_map.items()}
@@ -170,7 +157,7 @@ def render_sidebar(active_section):
             menu_items,
             label_visibility="collapsed",
             index=menu_items.index(
-                reverse_map.get(active_section, "⚡  Analyzer")
+                reverse_map.get(active_section, "Analyzer")
             )
         )
 
@@ -184,9 +171,15 @@ def render_sidebar(active_section):
 def render_header(title: str, subtitle: str):
     st.markdown(
         f"""
-        <div class='app-header'>
-            <div class='app-title'>{title}</div>
-            <div class='app-subtitle'>{subtitle}</div>
+        <div class='ui-hero ui-animate-in'>
+            <div class='ui-hero-title'>{title}</div>
+            <div class='ui-hero-subtitle'>{subtitle}</div>
+            <div class='ui-chip-row'>
+                <span class='ui-chip'>Static scan</span>
+                <span class='ui-chip'>Runtime trace</span>
+                <span class='ui-chip'>Error growth</span>
+                <span class='ui-chip'>AI remediation</span>
+            </div>
         </div>
         """,
         unsafe_allow_html=True
@@ -203,7 +196,7 @@ def render_code_input(code_value: str, height=300):
         st.session_state["code_textarea"] = code_value
 
     code = st.text_area(
-        "C Source Code Input Window",
+        "C source code",
         height=height,
         key="code_textarea",
         label_visibility="collapsed"
@@ -212,13 +205,13 @@ def render_code_input(code_value: str, height=300):
     col1, col2 = st.columns([1, 0.3])
 
     analyze = col1.button(
-        "🚀 Analyze Code",
+        "Analyze",
         key="analyze_btn",
         use_container_width=True
     )
 
     auto_fix = col2.button(
-        "🛠 Auto Fix",
+        "Auto-fix",
         key="autofix_btn",
         use_container_width=True
     )
@@ -246,19 +239,19 @@ def render_result_cards(summary_rows):
             
             # Dynamic Left Accent Border Color Picker
             if "❌" in status or "Unstable" in status:
-                border_color = "#ef4444"    # Alert Red
-                glow_shadow = "rgba(239, 68, 68, 0.15)"
+                border_color = "#d66a6a"
+                glow_shadow = "rgba(214, 106, 106, 0.12)"
             elif "⚠️" in status:
-                border_color = "#f59e0b"    # Warning Amber
-                glow_shadow = "rgba(245, 158, 11, 0.15)"
+                border_color = "#c89c4a"
+                glow_shadow = "rgba(200, 156, 74, 0.12)"
             else:
-                border_color = "#38bdf8"    # Stable Cyan Blue
-                glow_shadow = "rgba(56, 189, 248, 0.15)"
+                border_color = "#5ea4d6"
+                glow_shadow = "rgba(94, 164, 214, 0.12)"
 
             # Injecting pure, isolated HTML directly to guarantee clean execution block rendering
             st.markdown(
                 f"""
-                <div class='premium-telemetry-card' style='border-left: 4px solid {border_color};'>
+                <div class='premium-telemetry-card ui-animate-in' style='border-left: 3px solid {border_color};'>
                     <div class='telemetry-card-title'>
                         {row.get('function')}
                     </div>
@@ -272,41 +265,41 @@ def render_result_cards(summary_rows):
 
                 <style>
                 .premium-telemetry-card {{
-                    background: #080c14 !important;
-                    border: 1px solid #1e293b;
+                    background: linear-gradient(180deg, #0d1117 0%, #090c10 100%) !important;
+                    border: 1px solid rgba(255,255,255,0.08);
                     border-radius: 12px !important;
                     padding: 22px !important;
-                    box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.6), 0 8px 16px rgba(0, 0, 0, 0.4) !important;
-                    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 10px 22px rgba(0, 0, 0, 0.28) !important;
+                    transition: all 0.2s ease !important;
                     margin-bottom: 15px;
                 }}
 
                 .premium-telemetry-card:hover {{
-                    transform: translateY(-3px);
-                    border-color: rgba(56, 189, 248, 0.3) !important;
-                    box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.6), 0 12px 24px {glow_shadow} !important;
+                    transform: translateY(-2px);
+                    border-color: rgba(94, 164, 214, 0.22) !important;
+                    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 14px 28px {glow_shadow} !important;
                 }}
 
                 .telemetry-card-title {{
-                    font-family: 'Plus Jakarta Sans', sans-serif !important;
+                    font-family: 'Inter', sans-serif !important;
                     color: #f8fafc !important;
                     font-size: 16px !important;
                     font-weight: 700 !important;
-                    letter-spacing: -0.01em !important;
+                    letter-spacing: -0.02em !important;
                     margin-bottom: 6px !important;
                 }}
 
                 .telemetry-muted {{
-                    font-family: 'Plus Jakarta Sans', sans-serif !important;
+                    font-family: 'Inter', sans-serif !important;
                     font-size: 13px !important;
                     font-weight: 600 !important;
-                    color: #94a3b8 !important;
+                    color: #9aa3ad !important;
                     margin-bottom: 12px !important;
                 }}
 
                 .telemetry-card-reason {{
-                    font-family: 'Plus Jakarta Sans', sans-serif !important;
-                    color: #cbd5e1 !important;
+                    font-family: 'Inter', sans-serif !important;
+                    color: #c9d1d9 !important;
                     font-size: 13.5px !important;
                     line-height: 1.6 !important;
                 }}
@@ -322,9 +315,11 @@ def render_result_cards(summary_rows):
 
 def render_graph(ax, title, description):
 
-    st.markdown(f"**{title}**")
+    st.markdown(f"<div class='ui-section-title'>{title}</div>", unsafe_allow_html=True)
 
+    st.markdown("<div class='ui-surface ui-animate-in'>", unsafe_allow_html=True)
     st.pyplot(ax.figure)
+    st.markdown("</div>", unsafe_allow_html=True)
 
     if description:
         st.markdown(
@@ -339,7 +334,9 @@ def render_graph(ax, title, description):
 
 def render_report_block(title, body_lines):
 
-    st.markdown(f"### {title}")
+    st.markdown(f"<div class='ui-section-title'>{title}</div>", unsafe_allow_html=True)
 
+    st.markdown("<div class='ui-surface ui-animate-in'>", unsafe_allow_html=True)
     for line in body_lines:
         st.write(f"- {line}")
+    st.markdown("</div>", unsafe_allow_html=True)

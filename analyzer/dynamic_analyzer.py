@@ -41,8 +41,7 @@ def _division_reference(x):
 
 
 def _unstable_expr_float(x):
-    # Match optimized inverse conjugate structure layout: 1.0 / (sqrt(x*x + 1.0) + x)
-    return 1.0 / (math.sqrt(x * x + 1.0) + x)
+    return math.sqrt(x * x + 1.0) - x
 
 def _unstable_expr_reference(x):
     return 1.0 / (math.sqrt(x * x + 1.0) + x)
@@ -50,18 +49,16 @@ def _unstable_expr_reference(x):
 
 def _trig_float(x):
     delta = 1e-8
-    x_val = 1000000.0
-    return 2.0 * math.sin(delta / 2.0) * math.cos(x_val + delta / 2.0)
+    return math.sin(x) - math.sin(x + delta)
 
 def _trig_reference(x):
     delta = 1e-8
-    x_val = 1000000.0
-    return float(Decimal(2.0) * Decimal(math.sin(delta / 2.0)) * Decimal(math.cos(x_val + delta / 2.0)))
+    # Analytical trigonometric identity product representation
+    return -2.0 * math.sin(delta / 2.0) * math.cos(x + delta / 2.0)
 
 
 def _log_float(x):
-    # Match the stable log1p alternative API call implementation
-    return math.log1p(1.0 / x)
+    return math.log(x + 1.0) - math.log(x)
 
 def _log_reference(x):
     return math.log1p(1.0 / x)
@@ -71,7 +68,7 @@ def _mixed_float(x):
     denominator = x - 1.0
     if abs(denominator) < DBL_EPSILON:
         return float('inf')
-    return 1.0 / (math.sqrt(x * x + 1.0) + x) / denominator
+    return (math.sqrt(x * x + 1.0) - x) / denominator
 
 def _mixed_reference(x):
     denominator = x - 1.0

@@ -26,6 +26,6 @@ def analyze_file(file_path):
 
     print("\n[Static Analysis Report]")
     for issue in issues:
-        print("⚠️", issue)
+        print("[WARNING]", issue)
 
     return issues

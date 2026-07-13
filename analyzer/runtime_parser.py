@@ -87,10 +87,6 @@ def classify_result(label, value, dynamic_reference=None):
         if error_amt > 1e-10:
             return "Medium", "⚠️ Risky", f"Significant precision degradation ({error_amt:.2e} {metric_type})"
         
-        # Mathematical verification passed, but check if code structure matches an instability pattern
-        if any(tok in label_upper for tok in ["CANCELLATION", "UNSTABLE", "DIVISION", "TRIG", "LOG", "MIXED"]):
-            return "Low", "⚠️ Potentially Unstable", f"Pattern matches structural risk; well-behaved for this specific input."
-            
         return "Low", "✅ Stable", "Matches high-precision reference baseline"
 
     # 3. Fallback to Strict Static Token Labels only if no Reference Engine exists

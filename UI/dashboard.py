@@ -22,27 +22,25 @@ def render_app(state):
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-        /* 1. Global Application Canvas Reset */
         .stApp {
-            background: radial-gradient(circle at 50% -20%, #0f1524 0%, #05070c 70%) !important;
-            font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+            background:
+                radial-gradient(circle at top, rgba(94, 164, 214, 0.08), transparent 32%),
+                linear-gradient(180deg, #07090d 0%, #040506 100%) !important;
+            font-family: 'Inter', system-ui, sans-serif !important;
         }
 
-        /* PREMIUM SIDEBAR OVERHAUL MATCHING MAIN CANVAS */
         section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #090d16 0%, #05070c 100%) !important;
-            border-right: 1px solid #1e293b !important;
-            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.6);
+            background: linear-gradient(180deg, #0b0f14 0%, #080b10 100%) !important;
+            border-right: 1px solid rgba(255,255,255,0.06) !important;
+            box-shadow: 8px 0 30px rgba(0, 0, 0, 0.35);
         }
 
-        /* Hide Default Radio Selection Glyphs */
         div[role="radiogroup"] > label > div:first-child {
             display: none !important;
         }
 
-        /* Force Sidebar Radio List to fill layout uniformly */
         div[role="radiogroup"] {
             display: flex !important;
             flex-direction: column !important;
@@ -51,10 +49,9 @@ def render_app(state):
             padding: 0 !important;
         }
 
-        /* High-End Navigation Cards Match */
         div[role="radiogroup"] label {
-            background: rgba(15, 23, 42, 0.4) !important;
-            border: 1px solid #1e293b !important;
+            background: rgba(255, 255, 255, 0.02) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
             border-radius: 14px !important;
             padding: 14px 20px !important;
             margin: 0 !important;
@@ -65,147 +62,180 @@ def render_app(state):
             align-items: center !important;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
             cursor: pointer !important;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
-        /* Sidebar Item Hover Micro-Transitions */
         div[role="radiogroup"] label:hover {
             transform: translateX(4px);
-            background: rgba(30, 41, 59, 0.6) !important;
-            border-color: #38bdf8 !important;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.1) !important;
+            background: rgba(255, 255, 255, 0.04) !important;
+            border-color: rgba(94, 164, 214, 0.30) !important;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18) !important;
         }
 
-        /* Active Navigation Tab matching Studio Accents */
         div[role="radiogroup"] label:has(input:checked) {
-            background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%) !important;
-            border-color: #38bdf8 !important;
-            box-shadow: 0 0 24px rgba(56, 189, 248, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+            background: linear-gradient(180deg, rgba(20, 26, 33, 0.98) 0%, rgba(13, 18, 24, 0.98) 100%) !important;
+            border-color: rgba(94, 164, 214, 0.65) !important;
+            box-shadow: 0 0 0 1px rgba(94, 164, 214, 0.12), 0 10px 24px rgba(0, 0, 0, 0.26) !important;
         }
 
-        /* Typography Formatting Elements inside Sidebar Components */
         div[role="radiogroup"] label p {
-            font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+            font-family: 'Inter', system-ui, sans-serif !important;
             font-size: 14.5px !important;
             font-weight: 500 !important;
-            color: #94a3b8 !important;
-            letter-spacing: -0.01em !important;
+            color: #a0a8b3 !important;
+            letter-spacing: 0.01em !important;
             margin: 0 !important;
             transition: color 0.2s ease !important;
         }
 
         div[role="radiogroup"] label:has(input:checked) p {
-            color: #f8fafc !important;
+            color: #f4f7fb !important;
             font-weight: 600 !important;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         div[role="radiogroup"] label:hover p {
-            color: #38bdf8 !important;
+            color: #d8e7f4 !important;
         }
 
-        /* Premium Logo Card Adjustments for Sidebar Space */
         .logo-card {
-            background: linear-gradient(145deg, rgba(15, 23, 42, 0.8) 0%, rgba(8, 12, 21, 0.9) 100%) !important;
-            border: 1px solid #1e293b !important;
-            border-left: 5px solid #38bdf8 !important;
+            background: linear-gradient(180deg, rgba(18, 23, 29, 0.98) 0%, rgba(11, 15, 19, 0.98) 100%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-left: 3px solid rgba(94, 164, 214, 0.75) !important;
             border-radius: 16px !important;
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5) !important;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35) !important;
         }
 
-        /* 2. Overwriting Default Main Content Frame */
         .main .block-container {
-            padding-top: 3.5rem !important;
-            padding-bottom: 4rem !important;
+            padding-top: 2.5rem !important;
+            padding-bottom: 3rem !important;
             max-width: 1200px !important;
         }
 
-        /* 3. Advanced Monospace Text-Area Editor Customization (VS-Code Obsidian Variant) */
         div[data-testid="stTextArea"] textarea {
-            background-color: #080c14 !important;
-            color: #f1f5f9 !important;
-            border: 1px solid #1e293b !important;
+            background: linear-gradient(180deg, #0a0d12 0%, #080b0f 100%) !important;
+            color: #f3f4f6 !important;
+            border: 1px solid rgba(255,255,255,0.10) !important;
             border-radius: 14px !important;
-            font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+            font-family: 'JetBrains Mono', monospace !important;
             font-size: 13.5px !important;
             line-height: 1.6 !important;
             padding: 18px !important;
-            box-shadow: inset 0 8px 24px rgba(0, 0, 0, 0.7) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), inset 0 12px 24px rgba(0,0,0,0.45) !important;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
         
-        /* Focus Ring Glow on Active Text Area Selection */
         div[data-testid="stTextArea"] textarea:focus {
-            border-color: #38bdf8 !important;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.12), inset 0 4px 12px rgba(0,0,0,0.7) !important;
+            border-color: rgba(94, 164, 214, 0.75) !important;
+            box-shadow: 0 0 0 1px rgba(94, 164, 214, 0.18), inset 0 12px 24px rgba(0,0,0,0.45) !important;
         }
 
-        /* 4. Glassmorphism Design Pattern for the AI Reasoning Canvas */
         .glass-premium-card {
-            background: linear-gradient(145deg, rgba(15, 23, 42, 0.6) 0%, rgba(8, 12, 21, 0.8) 100%);
+            background: linear-gradient(180deg, rgba(16, 20, 26, 0.96) 0%, rgba(10, 13, 17, 0.96) 100%);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            border-left: 6px solid #38bdf8;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-left: 3px solid rgba(94, 164, 214, 0.75);
             padding: 28px;
             border-radius: 16px;
             margin-top: 24px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(56, 189, 248, 0.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.32);
         }
 
-        /* 5. Custom Button Engine Ruleset (High Contrast Premium Controls) */
         div.stButton > button {
-            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+            background: linear-gradient(180deg, #12161c 0%, #0b0f14 100%) !important;
             color: #f1f5f9 !important;
-            border: 1px solid #334155 !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
             border-radius: 12px !important;
             padding: 12px 28px !important;
             font-size: 14px !important;
             font-weight: 600 !important;
             letter-spacing: -0.01em !important;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28) !important;
         }
         
-        /* Distinctive Hover Feedback Transitions */
         div.stButton > button:hover {
-            border-color: #38bdf8 !important;
-            color: #38bdf8 !important;
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%) !important;
-            box-shadow: 0 0 24px rgba(56, 189, 248, 0.18) !important;
+            border-color: rgba(94, 164, 214, 0.55) !important;
+            color: #d8e7f4 !important;
+            background: linear-gradient(180deg, #0f1318 0%, #12171d 100%) !important;
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35) !important;
             transform: translateY(-1px);
         }
 
-        /* Dynamic Visual Overwrites for Metric Cards Structure */
         div[data-testid="metric-container"] {
-            background: linear-gradient(180deg, #0b0f19 0%, #070a10 100%) !important;
-            border: 1px solid #1e293b !important;
+            background: linear-gradient(180deg, #0d1117 0%, #090c10 100%) !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
             padding: 20px !important;
             border-radius: 14px !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+            box-shadow: 0 10px 22px rgba(0,0,0,0.24) !important;
         }
 
-        /* 6. Typography Formatting Elements */
         h1, h2, h3, h4 {
-            font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+            font-family: 'Inter', system-ui, sans-serif !important;
             letter-spacing: -0.02em !important;
         }
 
-        /* Gradient Visual Border Rules */
         hr {
             border: 0 !important;
             height: 1px !important;
-            background: linear-gradient(90deg, transparent, #1e293b, transparent) !important;
-            margin: 2.5rem 0 !important;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent) !important;
+            margin: 2rem 0 !important;
         }
 
-        /* Custom Alert Container Strip Fixes */
         div.stAlert {
-            background-color: rgba(15, 23, 42, 0.4) !important;
-            border: 1px solid #1e293b !important;
-            backdrop-filter: blur(8px);
+            background-color: rgba(10, 13, 17, 0.96) !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
+            backdrop-filter: blur(10px);
             border-radius: 12px !important;
+        }
+
+        .dashboard-topline {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.9rem;
+            margin: 1rem 0 1.25rem 0;
+        }
+
+        .dashboard-stat {
+            background: linear-gradient(180deg, rgba(16, 20, 26, 0.96) 0%, rgba(9, 12, 16, 0.96) 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 0.95rem 1rem;
+            box-shadow: 0 14px 28px rgba(0,0,0,0.24);
+        }
+
+        .dashboard-stat-label {
+            color: #9aa3ad;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 0.35rem;
+        }
+
+        .dashboard-stat-value {
+            color: #f8fafc;
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+        }
+
+        .dashboard-stat-note {
+            color: #c7d0d8;
+            font-size: 0.82rem;
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-topline {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .dashboard-topline {
+                grid-template-columns: 1fr;
+            }
         }
         </style>
         """,
@@ -214,6 +244,27 @@ def render_app(state):
 
     # Header Panel Rendering
     render_header('Numerical Stability Analyzer', 'Advanced Hybrid Floating-Point Verification Platform')
+
+    top_metrics = [
+        ("Static findings", len(state.get('key_findings', [])), "pattern scan output"),
+        ("Runtime groups", len(state.get('runtime_summary', [])), "parsed C results"),
+        ("Saved plots", len(state.get('plots', {})), "error progression views"),
+        ("AI notes", 1 if state.get('ai_explanation') else 0, "optimization context"),
+    ]
+
+    st.markdown("<div class='dashboard-topline ui-animate-in'>", unsafe_allow_html=True)
+    for label, value, note in top_metrics:
+        st.markdown(
+            f"""
+            <div class='dashboard-stat'>
+                <div class='dashboard-stat-label'>{label}</div>
+                <div class='dashboard-stat-value'>{value}</div>
+                <div class='dashboard-stat-note'>{note}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     # =====================================================
     # SECTION 1: ANALYZER MAIN PANEL (MODERNIZED SPLIT VIEW)
@@ -226,16 +277,16 @@ def render_app(state):
         
         if ai_explanation:
             st.markdown(
-                "<h3 style='color: #f8fafc; font-size: 1.55rem; font-weight: 700; margin-bottom: 5px;'>🛠️ AI Code Optimization Studio</h3>", 
+                "<h3 style='color: #f8fafc; font-size: 1.35rem; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.03em;'>AI code optimization studio</h3>", 
                 unsafe_allow_html=True
             )
-            st.info("💡 Clear your workspace by hitting 'Run Analysis' on a new segment to drop back to standard editor view.")
+            st.info("Clear the workspace by running analysis on a fresh code block to return to the standard editor view.")
             
             # Create a premium side-by-side twin IDE code comparison grid layout
             code_col1, code_col2 = st.columns(2)
             
             with code_col1:
-                st.markdown("<h4 style='color: #ef4444; font-size: 1.05rem; font-weight: 600; margin-bottom: 14px; letter-spacing: -0.01em;'>🟥 Original Vulnerable Code</h4>", unsafe_allow_html=True)
+                st.markdown("<div class='ui-section-title'>Original code</div>", unsafe_allow_html=True)
                 st.text_area(
                     "Original Input View",
                     value=state.get('original_backup_code', state.get('code', '')),
@@ -246,7 +297,7 @@ def render_app(state):
                 )
                 
             with code_col2:
-                st.markdown("<h4 style='color: #34d399; font-size: 1.05rem; font-weight: 600; margin-bottom: 14px; letter-spacing: -0.01em;'>🟩 AI Stabilized Code</h4>", unsafe_allow_html=True)
+                st.markdown("<div class='ui-section-title'>Working copy</div>", unsafe_allow_html=True)
                 updated_code = st.text_area(
                     "AI Optimized View",
                     height=450,
@@ -258,10 +309,10 @@ def render_app(state):
             # Render actions panel below the comparison matrix
             st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
             btn_col1, btn_col2 = st.columns([1, 0.3])
-            if btn_col1.button("🚀 Analyze Optimized Code", key="analyze_btn", use_container_width=True):
+            if btn_col1.button("Run analysis", key="analyze_btn", use_container_width=True):
                 state['analyze_pressed'] = True
                 st.rerun()
-            if btn_col2.button("↩️ Reset Editor", key="reset_editor_btn", use_container_width=True):
+            if btn_col2.button("Reset", key="reset_editor_btn", use_container_width=True):
                 state['code'] = state.get('original_backup_code', state['code'])
                 state['ai_explanation'] = ''
                 if "code_textarea" in st.session_state:
@@ -272,12 +323,12 @@ def render_app(state):
             # DEEP ACADEMIC REASONING CARD (RENDERED IMMEDIATELY BELOW)
             # =====================================================
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("<h3 style='color: #f8fafc; font-size: 1.35rem; font-weight: 700;'>🧠 Deep Mathematical Justification</h3>", unsafe_allow_html=True)
+            st.markdown("<div class='ui-section-title'>Deep mathematical justification</div>", unsafe_allow_html=True)
             
             st.markdown(
                 f"""
                 <div class="glass-premium-card">
-                    <h5 style="color: #38bdf8; font-size: 1.1rem; margin-top: 0; margin-bottom: 12px; font-weight: 600;">Automated Engineering Summary:</h5>
+                    <h5 style="color: #dce8f2; font-size: 1rem; margin-top: 0; margin-bottom: 12px; font-weight: 600; letter-spacing: -0.02em;">Automated engineering summary</h5>
                     <div style="color: #cbd5e1; line-height: 1.8; font-size: 14px; font-family: 'Plus Jakarta Sans', sans-serif;">
                         {ai_explanation}
                     </div>
@@ -298,14 +349,14 @@ def render_app(state):
                 st.rerun()
 
         st.markdown('---')
-        st.markdown("<h3 style='color: #f8fafc; font-size: 1.45rem; font-weight: 700; margin-bottom: 22px;'>📊 Pipeline Telemetry States</h3>", unsafe_allow_html=True)
+        st.markdown("<div class='ui-section-title'>Pipeline telemetry states</div>", unsafe_allow_html=True)
         render_result_cards(state.get('runtime_summary', []))
 
     # =====================================================
     # SECTION 2: INTERACTIVE VISUALIZATION MATRIX
     # =====================================================
     elif selected == 'Visualization':
-        st.markdown("<h2 style='color: #f8fafc; font-size: 1.75rem; font-weight: 700;'>📊 Error Vector Visualization</h2>", unsafe_allow_html=True)
+        st.markdown("<div class='ui-section-title'>Error vector visualization</div>", unsafe_allow_html=True)
         st.markdown('---')
         
         plots = state.get('plots', {})
@@ -322,7 +373,7 @@ def render_app(state):
                 )
                 selected_key = [k for k, v in available_functions.items() if v == selected_display_name][0]
                 
-                st.markdown(f"<h3 style='color: #cbd5e1; font-size: 1.15rem; font-weight: 600; margin-top: 22px; margin-bottom: 16px;'>Dynamic Convergence Profile: <span style='color: #38bdf8;'>{selected_display_name}</span></h3>", unsafe_allow_html=True)
+                st.markdown(f"<div class='ui-section-title'>Dynamic convergence profile: <span style='color:#d8e7f4;'>{selected_display_name}</span></div>", unsafe_allow_html=True)
                 st.pyplot(plots[selected_key])
             else:
                 st.warning("No functional error profiles match current analyzer telemetry arrays.")
@@ -333,7 +384,7 @@ def render_app(state):
     # SECTION 3: ACADEMIC EVALUATION REPORT SCREENS
     # =====================================================
     elif selected == 'Report':
-        st.markdown("<h2 style='color: #f8fafc; font-size: 1.75rem; font-weight: 700;'>📑 Analytical Compilation Report</h2>", unsafe_allow_html=True)
+        st.markdown("<div class='ui-section-title'>Analytical compilation report</div>", unsafe_allow_html=True)
         st.markdown('---')
         render_report_block('Key Findings', state.get('key_findings', []))
         render_report_block('Suggestions', state.get('suggestions', []))

@@ -26,7 +26,7 @@ def load_local_env():
                     hidden_val = value[:6] + "..." + value[-4:] if len(value) > 10 else "SHORT_VAL"
                     print(f"  └─ Line {line_idx}: Loaded environment variable '{key}' = {hidden_val}")
     else:
-        print(f"[⚠️ WARNING AI] No .env file discovered at {os.path.abspath(env_path)}.")
+        print(f"[WARNING AI] No .env file discovered at {os.path.abspath(env_path)}.")
 
 def get_grok_client():
     # Force load local configuration entries
@@ -36,7 +36,7 @@ def get_grok_client():
     print(f"[DEBUG AI] Retrieving 'XAI_API_KEY' from os.environ: {'FOUND' if api_key else 'NOT FOUND'}")
     
     if not api_key:
-        print("[❌ ERROR AI] Missing API Key footprint.")
+        print("[ERROR AI] Missing API Key footprint.")
         return None
         
     print("[DEBUG AI] Routing pipeline configuration to official Groq API gateway endpoints...")
@@ -114,7 +114,7 @@ Your response MUST follow this exact format:
         )
         
         raw_text = response.choices[0].message.content
-        print("\n[🛰️ RAW AI RESPONSE RECEIVED SUCCESSFULLY]")
+        print("\n[RAW AI RESPONSE RECEIVED SUCCESSFULLY]")
         print("-" * 50)
         print(raw_text)
         print("-" * 50)
@@ -128,24 +128,24 @@ Your response MUST follow this exact format:
             fixed_code = code_part.group(1).strip()
             explanation = expl_part.group(1).strip() if expl_part else "Patched successfully."
         else:
-            print("[⚠️ WARNING AI] Standard parsing anchors missing. Attempting structural string fallback parsing...")
+            print("[WARNING AI] Standard parsing anchors missing. Attempting structural string fallback parsing...")
             if "int main" in raw_text:
                 fixed_code = raw_text
                 explanation = "Applied optimization pass without explicit format anchors."
             else:
-                print("[❌ ERROR AI] Response formatting unexpected.")
+                print("[ERROR AI] Response formatting unexpected.")
                 fixed_code = c_code
                 explanation = f"Parsing Error: Could not locate text boundaries."
         
         fixed_code = re.sub(r'^```c\n|^```|```$', '', fixed_code, flags=re.MULTILINE).strip()
         
-        print("[✓ SUCCESS AI] Pipeline completed processing sequence cleanly.")
+        print("[SUCCESS AI] Pipeline completed processing sequence cleanly.")
         print("="*60 + "\n")
         return {"fixed_code": fixed_code, "explanation": explanation}
 
     except Exception as e:
         print("\n" + "!"*60)
-        print(f"[💥 CRITICAL API EXCEPTION CAUGHT]")
+        print(f"[CRITICAL API EXCEPTION CAUGHT]")
         print(f"  Exception Type: {type(e).__name__}")
         print(f"  Error Message:  {str(e)}")
         print("!"*60 + "\n")

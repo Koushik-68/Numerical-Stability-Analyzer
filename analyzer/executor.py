@@ -1,12 +1,13 @@
 import subprocess
 
-def compile_code(source_file):
-    exe_file = "instrumented_code/output.exe"
+def compile_code(source_file, exe_file=None):
+    if exe_file is None:
+        exe_file = "instrumented_code/output.exe"
 
     compile_cmd = ["gcc", source_file, "-o", exe_file]
 
     subprocess.run(compile_cmd, check=True)
-    print("[✓] Compilation Successful")
+    print(f"[OK] Compilation Successful: {exe_file}")
 
     return exe_file
 
