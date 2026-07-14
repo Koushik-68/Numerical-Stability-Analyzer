@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 // Predefined AST Database for standard numerical stability vulnerabilities
 const AST_PATTERNS = {
@@ -254,28 +254,55 @@ const AST_PATTERNS = {
   }
 };
 
-export default function AstVisualizerView({ code }) {
+export default function AstVisualizerView({ code, results }) {
+  const activePatterns = useMemo(() => {
+    if (results?.plots) {
+      const keys = Object.keys(results.plots);
+      const filtered = {};
+      keys.forEach((key) => {
+        if (AST_PATTERNS[key]) {
+          filtered[key] = AST_PATTERNS[key];
+        }
+      });
+      return Object.keys(filtered).length ? filtered : AST_PATTERNS;
+    }
+    return AST_PATTERNS;
+  }, [results]);
+
   const [selectedKey, setSelectedKey] = useState("unstable_expr");
+
+  useEffect(() => {
+    const keys = Object.keys(activePatterns);
+    if (keys.length > 0 && !keys.includes(selectedKey)) {
+      setSelectedKey(keys[0]);
+    }
+  }, [activePatterns, selectedKey]);
+
   const [hoveredNode, setHoveredNode] = useState(null);
 
   // Auto-detect matching pattern based on compiler input code
   useEffect(() => {
     if (!code) return;
     const lowerCode = code.toLowerCase();
+    const keys = Object.keys(activePatterns);
+    let matchedKey = "";
     if (lowerCode.includes("log1p") || (lowerCode.includes("log(") && lowerCode.includes("- log"))) {
-      setSelectedKey("log");
+      matchedKey = "log";
     } else if (lowerCode.includes("sin") && lowerCode.includes("cos") && lowerCode.includes("-")) {
-      setSelectedKey("trig");
+      matchedKey = "trig";
     } else if (lowerCode.includes("dbl_min") || lowerCode.includes("denominator")) {
-      setSelectedKey("division");
+      matchedKey = "division";
     } else if (lowerCode.includes("dbl_epsilon") || lowerCode.includes("12345678")) {
-      setSelectedKey("cancellation");
+      matchedKey = "cancellation";
     } else if (lowerCode.includes("sqrt") && lowerCode.includes("- x")) {
-      setSelectedKey("unstable_expr");
+      matchedKey = "unstable_expr";
     }
-  }, [code]);
+    if (matchedKey && keys.includes(matchedKey)) {
+      setSelectedKey(matchedKey);
+    }
+  }, [code, activePatterns]);
 
-  const pattern = AST_PATTERNS[selectedKey] || AST_PATTERNS.unstable_expr;
+  const pattern = activePatterns[selectedKey] || Object.values(activePatterns)[0] || AST_PATTERNS.unstable_expr;
 
   // Recursive tree renderer component
   const renderAstNode = (node, isBefore = true) => {
@@ -667,9 +694,9 @@ export default function AstVisualizerView({ code }) {
             onChange={(e) => setSelectedKey(e.target.value)}
             className="dropdown-ast"
           >
-            {Object.keys(AST_PATTERNS).map((key) => (
+            {Object.keys(activePatterns).map((key) => (
               <option key={key} value={key}>
-                {AST_PATTERNS[key].label}
+                {activePatterns[key].label}
               </option>
             ))}
           </select>

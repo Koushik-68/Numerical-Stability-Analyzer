@@ -22,7 +22,7 @@ from analyzer.runtime_parser import (
     overall_status_from_summary,
     summarize_results,
 )
-from analyzer.static_analyzer import detect_patterns
+from analyzer.static_analyzer import detect_patterns, detect_functions
 
 
 def _json_default(value):
@@ -56,10 +56,9 @@ def _read_json(handler):
     return json.loads(raw.decode("utf-8"))
 
 
-def _build_plot_data(summary_rows, is_fixed=False):
+def _build_plot_data(detected_functions, is_fixed=False):
     plot_data = {}
-    for row in summary_rows:
-        func_key = row.get("function_key")
+    for func_key in detected_functions:
         if func_key not in FUNCTION_PROFILES or func_key in plot_data:
             continue
 
@@ -89,6 +88,7 @@ def _build_plot_data(summary_rows, is_fixed=False):
 def analyze_code(code, is_fixed=False):
     import uuid
     static_issues = detect_patterns(code)
+    detected_funcs = detect_functions(code)
     suggestion_list = suggest_fix(code)
 
     os.makedirs(os.path.join(ROOT_DIR, "input_code"), exist_ok=True)
@@ -108,9 +108,12 @@ def analyze_code(code, is_fixed=False):
         stdout_output = run_code(exe_file)
 
         summary = summarize_results(stdout_output)
+        # Filter summary to only contain functions present in detected_funcs
+        summary = [row for row in summary if row.get("function_key") in detected_funcs]
+        
         traces = extract_traces(stdout_output)
         result_entries = extract_results(stdout_output)
-        plot_data = _build_plot_data(summary, is_fixed=is_fixed)
+        plot_data = _build_plot_data(detected_funcs, is_fixed=is_fixed)
 
         if result_entries and len(result_entries) == 1 and result_entries[0][0] == "RESULT":
             overall_status = "✅ Stable"
@@ -125,6 +128,7 @@ def analyze_code(code, is_fixed=False):
 
         return {
             "staticIssues": static_issues,
+            "detectedFunctions": detected_funcs,
             "suggestions": suggestion_list,
             "runtimeSummary": summary,
             "traces": [{"name": name, "value": value} for name, value in traces],

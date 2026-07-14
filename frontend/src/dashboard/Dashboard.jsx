@@ -572,13 +572,13 @@ export default function Dashboard() {
           />
         )}
 
-        {activeView === "visualization" && <VisualizationView code={code} />}
+        {activeView === "visualization" && <VisualizationView code={code} results={results} />}
 
-        {activeView === "ast_visualizer" && <AstVisualizerView code={code} />}
+        {activeView === "ast_visualizer" && <AstVisualizerView code={code} results={results} />}
 
         {activeView === "playground" && <PlaygroundView />}
 
-        {activeView === "heatmap" && <HeatmapView />}
+        {activeView === "heatmap" && <HeatmapView results={results} />}
 
         {activeView !== "comparison" &&
           activeView !== "visualization" &&

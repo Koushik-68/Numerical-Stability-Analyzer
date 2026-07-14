@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 
 const PRESETS = [
   {
@@ -72,8 +72,31 @@ function Icon({ name }) {
   );
 }
 
-export default function HeatmapView() {
+export default function HeatmapView({ results }) {
+  const activePresets = useMemo(() => {
+    if (results?.plots) {
+      const keys = Object.keys(results.plots);
+      const keyMap = {
+        unstable_expr: "Loss of Significance",
+        cancellation: "Catastrophic Cancellation",
+        trig: "Trigonometric Phase Erasure",
+        log: "Logarithmic Instability"
+      };
+      const activeNames = keys.map((k) => keyMap[k]).filter(Boolean);
+      const filtered = PRESETS.filter((p) => activeNames.includes(p.name));
+      return filtered.length ? filtered : PRESETS;
+    }
+    return PRESETS;
+  }, [results]);
+
   const [selectedPresetIndex, setSelectedPresetIndex] = useState(0);
+
+  useEffect(() => {
+    if (selectedPresetIndex >= activePresets.length) {
+      setSelectedPresetIndex(0);
+    }
+  }, [activePresets, selectedPresetIndex]);
+
   const [expression, setExpression] = useState(PRESETS[0].original);
   const [isRemediated, setIsRemediated] = useState(false);
 
@@ -97,16 +120,21 @@ export default function HeatmapView() {
   const canvasRef = useRef(null);
 
   // Synchronize inputs with chosen preset
+  useEffect(() => {
+    const preset = activePresets[selectedPresetIndex] || activePresets[0];
+    if (preset) {
+      setExpression(isRemediated ? preset.remediated : preset.original);
+      setXMin(preset.xMin);
+      setXMax(preset.xMax);
+      setXScale(preset.xScale);
+      setYMin(preset.yMin);
+      setYMax(preset.yMax);
+      setYScale(preset.yScale);
+    }
+  }, [activePresets, selectedPresetIndex, isRemediated]);
+
   const applyPreset = (index) => {
     setSelectedPresetIndex(index);
-    const preset = PRESETS[index];
-    setExpression(isRemediated ? preset.remediated : preset.original);
-    setXMin(preset.xMin);
-    setXMax(preset.xMax);
-    setXScale(preset.xScale);
-    setYMin(preset.yMin);
-    setYMax(preset.yMax);
-    setYScale(preset.yScale);
   };
 
   // Toggle remediation formula
@@ -246,7 +274,7 @@ export default function HeatmapView() {
     return { label: "Catastrophic Cancellation", color: "red" };
   };
 
-  const preset = PRESETS[selectedPresetIndex];
+  const preset = activePresets[selectedPresetIndex] || activePresets[0];
 
   return (
     <div className="heatmap-layout" style={{ gridColumn: "2 / -1", display: "flex", flexDirection: "column", gap: "24px", padding: "20px" }}>
@@ -430,8 +458,8 @@ export default function HeatmapView() {
       {/* PRESETS GRID */}
       <section className="matte-panel" style={{ padding: "20px" }}>
         <h3 style={{ margin: "0 0 12px 0", fontSize: "1.05rem", fontWeight: "600" }}>Stability Category Presets</h3>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
-          {PRESETS.map((p, idx) => (
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${activePresets.length}, 1fr)`, gap: "12px" }}>
+          {activePresets.map((p, idx) => (
             <button
               key={idx}
               className={`preset-pill ${selectedPresetIndex === idx ? "active" : ""}`}

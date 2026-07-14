@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 const FUNCTIONS = [
   {
@@ -113,8 +113,24 @@ const formatScientific = (num) => {
   return num.toFixed(6);
 };
 
-export default function VisualizationView({ code }) {
+export default function VisualizationView({ code, results }) {
+  const activeFunctions = useMemo(() => {
+    if (results?.plots) {
+      const keys = Object.keys(results.plots);
+      const filtered = FUNCTIONS.filter((f) => keys.includes(f.key));
+      return filtered.length ? filtered : FUNCTIONS;
+    }
+    return FUNCTIONS;
+  }, [results]);
+
   const [selectedKey, setSelectedKey] = useState("unstable_expr");
+
+  useEffect(() => {
+    if (activeFunctions.length > 0 && !activeFunctions.find((f) => f.key === selectedKey)) {
+      setSelectedKey(activeFunctions[0].key);
+    }
+  }, [activeFunctions, selectedKey]);
+
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [isFixed, setIsFixed] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -534,7 +550,7 @@ export default function VisualizationView({ code }) {
                 className="dropdown-viz"
                 style={{ minWidth: "200px" }}
               >
-                {FUNCTIONS.map((f) => (
+                {activeFunctions.map((f) => (
                   <option key={f.key} value={f.key}>
                     {f.label}
                   </option>
